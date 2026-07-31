@@ -7,13 +7,24 @@ vim.pack.add {
   'https://github.com/MunifTanjim/nui.nvim',
 }
 
-vim.keymap.set('n', '\\', '<Cmd>Neotree reveal<CR>', { desc = 'NeoTree reveal', silent = true })
+vim.keymap.set('n', '<leader>e', '<Cmd>Neotree reveal<CR>', { desc = 'NeoTree reveal', silent = true })
 
 require('neo-tree').setup {
   filesystem = {
+    follow_current_file = {
+      enabled = true,
+      leave_dirs_open = false,
+    },
     window = {
       mappings = {
-        ['\\'] = 'close_window',
+        ['q'] = 'close_window',
+        ['Y'] = function(state)
+          local node = state.tree:get_node()
+          if node and node.path then
+            vim.fn.setreg('+', node.path)
+            vim.notify('Copied path: ' .. node.path)
+          end
+        end,
       },
     },
   },
