@@ -116,6 +116,26 @@ That's it! `vim.pack` will install all the plugins from your config. Use
 `:lua vim.pack.update()` to fetch updates (`:write` applies updates, `:quit`
 cancels them).
 
+#### Neovim Usage Report
+
+This config counts common key sequences, command names, and mode changes. It
+stores only counts in Neovim's state directory. It does not store file content,
+file paths, search text, or shell arguments.
+
+Open the report with:
+
+```vim
+:UsageReport
+```
+
+Reset the report with:
+
+```vim
+:UsageReset
+```
+
+The raw data is stored in `stdpath('state') .. '/nvim-usage.json'`.
+
 #### Read The Friendly Documentation
 
 Read through the `init.lua` file in your configuration folder for more

@@ -10,12 +10,23 @@ vim.pack.add {
 vim.keymap.set('n', '<leader>e', '<Cmd>Neotree reveal<CR>', { desc = 'NeoTree reveal', silent = true })
 
 require('neo-tree').setup {
+  default_component_configs = {
+    type = {
+      enabled = false,
+    },
+    last_modified = {
+      enabled = false,
+    },
+  },
+
   filesystem = {
     follow_current_file = {
       enabled = true,
       leave_dirs_open = false,
     },
     window = {
+      position = 'right',
+      auto_expand_width = true,
       mappings = {
         ['q'] = 'close_window',
         ['Y'] = function(state)

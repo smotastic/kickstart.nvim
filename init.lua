@@ -213,6 +213,21 @@ do
 
   vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+  -- Copy diagnostics on the current line to the system clipboard.
+  vim.keymap.set('n', '<leader>yh', function()
+    local diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line('.') - 1 })
+    if #diagnostics == 0 then
+      vim.notify('No diagnostic on this line', vim.log.levels.INFO)
+      return
+    end
+
+    local messages = vim.tbl_map(function(diagnostic)
+      return diagnostic.message
+    end, diagnostics)
+    vim.fn.setreg('+', table.concat(messages, '\n'))
+    vim.notify('Diagnostic copied')
+  end, { desc = 'Copy diagnostic hint' })
+
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
   -- is not what someone will guess without a bit more experience.
@@ -379,23 +394,11 @@ do
   }
 
   -- [[ Colorscheme ]]
-  -- You can easily change to a different colorscheme.
-  -- Change the name of the colorscheme plugin below, and then
-  -- change the command under that to load whatever the name of that colorscheme is.
-  --
-  -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-  vim.pack.add { gh 'folke/tokyonight.nvim' }
-  ---@diagnostic disable-next-line: missing-fields
-  require('tokyonight').setup {
-    styles = {
-      comments = { italic = false }, -- Disable italics in comments
-    },
-  }
+  -- Nebula Foundry is a local theme in colors/nebula-foundry.lua.
+  -- It combines the graphite IntelliJ layout with the violet accents used by Pi.
+  -- Change the command below if you want to try another installed theme.
 
-  -- Load the colorscheme here.
-  -- Like many other themes, this one has different styles, and you could load
-  -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-  vim.cmd.colorscheme 'tokyonight-moon'
+  vim.cmd.colorscheme 'nebula-foundry'
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
@@ -502,6 +505,14 @@ do
     --   },
     -- },
     -- pickers = {}
+    defaults = {
+      path_display = { 'filename_first' },
+      layout_config = {
+        horizontal = {
+          preview_width = 0.60,
+        },
+      },
+    },
     extensions = {
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
     },
@@ -906,7 +917,20 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+  local parsers = {
+    'bash',
+    'c',
+    'diff',
+    'html',
+    'json',
+    'lua',
+    'luadoc',
+    'markdown',
+    'markdown_inline',
+    'query',
+    'vim',
+    'vimdoc',
+  }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
@@ -969,7 +993,8 @@ do
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
   -- require 'kickstart.plugins.debug'
-  -- require 'kickstart.plugins.indent_line'
+  require 'kickstart.plugins.indent_line'
+  require 'kickstart.plugins.rainbow_delimiters'
   -- require 'kickstart.plugins.lint'
   -- require 'kickstart.plugins.autopairs'
   require 'kickstart.plugins.neo-tree'
@@ -980,6 +1005,18 @@ do
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   -- require 'custom.plugins'
 end
+
+-- ============================================================
+-- SECTION 11: PI CODE ANALYSIS
+-- Analyze the current line or exact visual selection in an isolated Pi process
+-- ============================================================
+require 'custom.pi_analyze'.setup()
+
+-- ============================================================
+-- SECTION 12: USAGE TRACKING
+-- Count common key sequences and command names without storing text or paths
+-- ============================================================
+require 'custom.usage'.setup()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
