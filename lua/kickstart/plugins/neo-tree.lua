@@ -26,8 +26,10 @@ require('neo-tree').setup {
     },
     window = {
       position = 'right',
-      auto_expand_width = true,
+      auto_expand_width = false,
       mappings = {
+        -- Keep <Space> available as the Neovim leader key in Neo-tree.
+        ['<space>'] = 'noop',
         ['q'] = 'close_window',
         ['Y'] = function(state)
           local node = state.tree:get_node()

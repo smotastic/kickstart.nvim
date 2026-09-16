@@ -228,6 +228,33 @@ do
     vim.notify('Diagnostic copied')
   end, { desc = 'Copy diagnostic hint' })
 
+  -- Copy the relative file path and selected line range to the system clipboard.
+  local function copy_file_location(start_line, end_line)
+    local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ':.')
+    if path == '' then
+      vim.notify('Buffer has no file path', vim.log.levels.INFO)
+      return
+    end
+
+    local location = ('%s:%d'):format(path, start_line)
+    if start_line ~= end_line then location = ('%s-%d'):format(location, end_line) end
+
+    vim.fn.setreg('+', location)
+    vim.notify('Copied: ' .. location)
+  end
+
+  vim.keymap.set('n', '<leader>yl', function()
+    local line = vim.fn.line('.')
+    copy_file_location(line, line)
+  end, { desc = 'Copy current file path and line' })
+
+  vim.keymap.set('v', '<leader>yl', function()
+    local start_line = vim.fn.line('v')
+    local end_line = vim.fn.line('.')
+    if start_line > end_line then start_line, end_line = end_line, start_line end
+    copy_file_location(start_line, end_line)
+  end, { desc = 'Copy relative file path and line range' })
+
   -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
   -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
   -- is not what someone will guess without a bit more experience.
@@ -488,11 +515,14 @@ do
     gh 'nvim-lua/plenary.nvim',
     gh 'nvim-telescope/telescope.nvim',
     gh 'nvim-telescope/telescope-ui-select.nvim',
+    gh 'nvim-telescope/telescope-live-grep-args.nvim',
   }
   if vim.fn.executable 'make' == 1 then table.insert(telescope_plugins, gh 'nvim-telescope/telescope-fzf-native.nvim') end
 
   -- NOTE: You can install multiple plugins at once
   vim.pack.add(telescope_plugins)
+
+  local lga_actions = require 'telescope-live-grep-args.actions'
 
   -- See `:help telescope` and `:help telescope.setup()`
   require('telescope').setup {
@@ -515,12 +545,20 @@ do
     },
     extensions = {
       ['ui-select'] = { require('telescope.themes').get_dropdown() },
+      live_grep_args = {
+        mappings = {
+          i = {
+            ['<C-k>'] = lga_actions.quote_prompt { postfix = ' --glob ' },
+          },
+        },
+      },
     },
   }
 
   -- Enable Telescope extensions if they are installed
   pcall(require('telescope').load_extension, 'fzf')
   pcall(require('telescope').load_extension, 'ui-select')
+  pcall(require('telescope').load_extension, 'live_grep_args')
 
   -- See `:help telescope.builtin`
   local builtin = require 'telescope.builtin'
@@ -529,7 +567,8 @@ do
   vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
   vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
   vim.keymap.set({ 'n', 'v' }, '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-  vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+  local live_grep_args = require('telescope').extensions.live_grep_args.live_grep_args
+  vim.keymap.set('n', '<leader>sg', live_grep_args, { desc = '[S]earch by [G]rep with arguments' })
   vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
   vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
   vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
@@ -1003,7 +1042,7 @@ do
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- require 'custom.plugins'
+  require 'custom.plugins'
 end
 
 -- ============================================================
