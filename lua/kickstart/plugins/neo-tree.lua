@@ -25,7 +25,7 @@ require('neo-tree').setup {
       leave_dirs_open = false,
     },
     window = {
-      position = 'right',
+      position = 'left',
       auto_expand_width = false,
       mappings = {
         -- Keep <Space> available as the Neovim leader key in Neo-tree.

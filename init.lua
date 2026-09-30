@@ -421,11 +421,10 @@ do
   }
 
   -- [[ Colorscheme ]]
-  -- Nebula Foundry is a local theme in colors/nebula-foundry.lua.
-  -- It combines the graphite IntelliJ layout with the violet accents used by Pi.
-  -- Change the command below if you want to try another installed theme.
-
-  vim.cmd.colorscheme 'nebula-foundry'
+  -- Use :colorscheme nebula-foundry to switch back to the local theme.
+  vim.pack.add { gh 'Mofiqul/vscode.nvim' }
+  require('vscode').setup {}
+  vim.cmd.colorscheme 'vscode'
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
