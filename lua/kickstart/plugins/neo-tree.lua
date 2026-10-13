@@ -42,3 +42,6 @@ require('neo-tree').setup {
     },
   },
 }
+
+-- Make the selected line in Neo-tree easy to see. VS Code uses this blue for the active list item.
+vim.api.nvim_set_hl(0, 'NeoTreeCursorLine', { bg = '#04395E', bold = true })

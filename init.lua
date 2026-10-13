@@ -99,7 +99,7 @@ do
   vim.g.maplocalleader = ' '
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = false
+  vim.g.have_nerd_font = true
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -173,6 +173,10 @@ do
   -- instead raise a dialog asking if you wish to save the current file(s)
   -- See `:help 'confirm'`
   vim.o.confirm = true
+
+  -- Draw a rounded border around every floating window (hover docs, signature help, ...).
+  -- See `:help 'winborder'`
+  vim.o.winborder = 'rounded'
 end
 
 -- ============================================================
@@ -354,6 +358,12 @@ do
         return
       end
 
+      if name == 'markdown-preview.nvim' then
+        -- Downloads a prebuilt preview server, so Node.js is not required
+        run_build(name, { 'sh', 'install.sh' }, ev.data.path .. '/app')
+        return
+      end
+
       if name == 'nvim-treesitter' then
         if not ev.data.active then vim.cmd.packadd 'nvim-treesitter' end
         vim.cmd 'TSUpdate'
@@ -421,10 +431,35 @@ do
   }
 
   -- [[ Colorscheme ]]
-  -- Use :colorscheme nebula-foundry to switch back to the local theme.
+  -- Installed themes. Switch at any time with `:colorscheme <name>`.
+  -- Nebula Foundry is a local theme in colors/nebula-foundry.lua (`:colorscheme nebula-foundry`).
+  -- To change the default, edit the `vim.cmd.colorscheme` line at the end of this block.
+
+  -- VS Code Dark+ theme. Activate with `:colorscheme vscode`.
   vim.pack.add { gh 'Mofiqul/vscode.nvim' }
-  require('vscode').setup {}
-  vim.cmd.colorscheme 'vscode'
+  require('vscode').setup { style = 'dark' }
+
+  -- With the VS Code theme, give floating windows a distinct background and a visible border,
+  -- so popups stand out from the code.
+  vim.api.nvim_create_autocmd('ColorScheme', {
+    pattern = 'vscode',
+    callback = function()
+      vim.api.nvim_set_hl(0, 'NormalFloat', { bg = '#252526' })
+      vim.api.nvim_set_hl(0, 'FloatBorder', { fg = '#569CD6', bg = '#252526' })
+    end,
+  })
+
+  -- Kanagawa theme. Variants: 'kanagawa-wave' (default), 'kanagawa-dragon' (darker), 'kanagawa-lotus' (light).
+  vim.pack.add { gh 'rebelot/kanagawa.nvim' }
+  require('kanagawa').setup {}
+
+  -- Flexoki theme (Neovim port of kepano/flexoki). Variants: 'flexoki-dark', 'flexoki-light'.
+  vim.pack.add { gh 'kepano/flexoki-neovim' }
+
+  -- Cyberdream theme. Variants: 'cyberdream' (dark), 'cyberdream-muted', 'cyberdream-light'.
+  vim.pack.add { gh 'scottmckendry/cyberdream.nvim' }
+
+  vim.cmd.colorscheme 'cyberdream'
 
   -- Highlight todo, notes, etc in comments
   vim.pack.add { gh 'folke/todo-comments.nvim' }
@@ -965,6 +1000,7 @@ do
     'luadoc',
     'markdown',
     'markdown_inline',
+    'mermaid',
     'query',
     'vim',
     'vimdoc',
